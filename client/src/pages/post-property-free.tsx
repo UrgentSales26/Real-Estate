@@ -97,7 +97,10 @@ const propertySchema = z.object({
     "office",
   ]),
   forSaleOrRent: z.enum(["sale"]),
-  price: z.coerce.number({ required_error: "Price is required", invalid_type_error: "Price must be a number" }),
+  price: z.coerce.number({
+    required_error: "Price is required",
+    invalid_type_error: "Price must be a number",
+  }),
   isUrgentSale: z.boolean().default(false),
   location: z
     .string()
@@ -105,9 +108,16 @@ const propertySchema = z.object({
   pincode: z
     .string()
     .min(5, { message: "Pincode must be at least 5 characters" }),
-  bedrooms: z.coerce.number({ invalid_type_error: "Bedrooms must be a number" }).optional(),
-  bathrooms: z.coerce.number({ invalid_type_error: "Bathrooms must be a number" }).optional(),
-  area: z.coerce.number({ required_error: "Area is required", invalid_type_error: "Area must be a number" }),
+  bedrooms: z.coerce
+    .number({ invalid_type_error: "Bedrooms must be a number" })
+    .optional(),
+  bathrooms: z.coerce
+    .number({ invalid_type_error: "Bathrooms must be a number" })
+    .optional(),
+  area: z.coerce.number({
+    required_error: "Area is required",
+    invalid_type_error: "Area must be a number",
+  }),
   areaUnit: z.enum(["sqft", "sqm", "acres", "hectares"]),
   contactName: z.string().min(2, { message: "Contact name is required" }),
   contactPhone: z
@@ -388,8 +398,11 @@ export default function PostPropertyFree() {
     }
 
     try {
+      // Create a complete property object with form data and images
+      const price = data.price;
+
       // Additional validations
-      if (data.price <= 0) {
+      if (price <= 0) {
         toast({
           title: "Invalid Price",
           description: "Please enter a valid price greater than 0",
@@ -422,7 +435,7 @@ export default function PostPropertyFree() {
       }
 
       // Since we're using z.coerce.number() in the schema, values are already converted to numbers
-      
+
       // Prepare expiry date for urgency sales
       const expiresAt = data.isUrgentSale
         ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -539,9 +552,9 @@ export default function PostPropertyFree() {
         description: data.description,
         propertyType: data.propertyType,
         rentOrSale: data.forSaleOrRent.toLowerCase(), // Using schema field name
-        price: data.price,
+        price: price,
         // If urgency sale, calculate 25% discount (only for premium users)
-        discountedPrice: data.isUrgentSale ? Math.round(data.price * 0.75) : null,
+        discountedPrice: data.isUrgentSale ? Math.round(price * 0.75) : null,
         location: data.location,
         city: city || "Unknown",
         address: data.location, // Using location as address too
@@ -1248,13 +1261,12 @@ export default function PostPropertyFree() {
                     <div>
                       <p className="text-base flex items-center">
                         <span className="line-through text-gray-500 mr-2">
-                          ₹
-                          {(form.getValues().price || 0).toLocaleString()}
+                          ₹{(form.getValues().price || 0).toLocaleString()}
                         </span>
                         <span className="text-red-600 font-semibold">
                           ₹
                           {Math.round(
-                            (form.getValues().price || 0) * 0.75
+                            (form.getValues().price || 0) * 0.75,
                           ).toLocaleString()}
                         </span>
                         <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -1268,8 +1280,7 @@ export default function PostPropertyFree() {
                     </div>
                   ) : (
                     <p className="text-base">
-                      ₹
-                      {(form.getValues().price || 0).toLocaleString()}
+                      ₹{(form.getValues().price || 0).toLocaleString()}
                     </p>
                   )}
                 </div>
