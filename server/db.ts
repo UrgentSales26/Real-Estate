@@ -1,11 +1,16 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import * as schema from '@shared/schema';
+import { db, sql } from '@shared/schema';
+import { schema } from '@shared/schema'; // Add this line if needed
 import pkg from 'pg';
 const { Pool } = pkg;
 import { log } from './vite';
 import { scrypt, randomBytes } from "crypto";
 import { promisify } from "util";
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Helper for password hashing
 const scryptAsync = promisify(scrypt);
@@ -99,6 +104,7 @@ export async function initializeDatabase() {
           verified BOOLEAN DEFAULT FALSE,
           email_verified BOOLEAN DEFAULT FALSE,
           phone_verified BOOLEAN DEFAULT FALSE,
+          subscription_level TEXT DEFAULT 'free',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -164,6 +170,7 @@ export async function initializeDatabase() {
           title TEXT NOT NULL,
           description TEXT,
           price DOUBLE PRECISION NOT NULL,
+          discounted_price DOUBLE PRECISION,
           property_type TEXT NOT NULL,
           status TEXT NOT NULL DEFAULT 'available',
           rent_or_sale TEXT NOT NULL,

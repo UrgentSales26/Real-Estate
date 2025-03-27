@@ -8,44 +8,55 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import {
-  ClipboardList,
-  Camera,
-  CheckCircle2,
-  Users2,
-  ChevronLeft,
-  ChevronRight,
-  Badge,
-  CreditCard,
-  Star,
-  Zap,
-  Award,
-  DollarSign,
-  Lock,
-  ArrowRight,
-  ArrowDown,
-  Phone,
-  Mail,
-  MessageSquare,
-  Building,
-  Upload,
-  Users,
-  BadgeCheck,
-  Check,
-  Home,
   MapPin,
-  Clock,
+  BedDouble,
+  Bath,
+  User,
+  CheckCircle2,
+  ChevronLeft,
+  ArrowRight,
+  Zap,
+  Star,
+  Check,
+  MessageSquare,
+  Badge,
+  Square,
+  Building,
+  Home,
+  RefreshCw,
+  HardHat,
+  Key,
+  ClipboardList,
+  Loader2,
+  Navigation,
+  Video,
+  Map,
+  Ruler,
+  Layout,
+  Car,
+  Compass,
+  Wifi,
+  Tv,
+  Droplets,
+  Fan,
+  ParkingSquare,
+  Armchair,
+  Sofa,
+  Fence,
+  TreePine,
+  Landmark,
+  Warehouse,
+  Factory,
+  Store,
+  ShieldCheck,
+  Dumbbell,
+  Waves,
+  Utensils,
 } from "lucide-react";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -64,12 +75,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -78,643 +83,1705 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectGroup,
+  SelectLabel,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import FileUpload, { FileWithPreview } from "@/components/upload/file-upload";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { OtpInput } from "@/components/ui/otp-input";
+import { Badge as ShadcnBadge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-// Property type schema
+// Updated schema with optional description
 const propertySchema = z.object({
-  title: z.string().min(5, { message: "Title must be at least 5 characters" }),
-  description: z
+  title: z
     .string()
-    .min(20, { message: "Description must be at least 20 characters" }),
-  propertyType: z.enum([
-    "apartment",
-    "villa",
-    "house",
-    "plot",
-    "commercial",
-    "office",
-  ]),
-  forSaleOrRent: z.enum(["sale"]),
-  price: z.coerce.number({
-    required_error: "Price is required",
-    invalid_type_error: "Price must be a number",
-  }),
+    .min(10, { message: "Title must be at least 10 characters" }),
+  description: z.string().optional(),
+  propertyType: z.string().min(1, { message: "Property type is required" }),
+  propertyCategory: z
+    .string()
+    .min(1, { message: "Property category is required" }),
+  transactionType: z
+    .string()
+    .min(1, { message: "Transaction type is required" }),
+  availableFromMonth: z.string().optional(),
+  availableFromYear: z.string().optional(),
+  constructionAge: z.string().optional(),
+  price: z.coerce
+    .number()
+    .min(100000, { message: "Minimum price is ₹1,00,000" }),
+  pricePerUnit: z.coerce.number().optional(),
+  totalPrice: z.coerce.number().optional(),
   isUrgentSale: z.boolean().default(false),
   location: z
     .string()
     .min(5, { message: "Location must be at least 5 characters" }),
-  pincode: z
-    .string()
-    .min(5, { message: "Pincode must be at least 5 characters" }),
-  bedrooms: z.coerce
-    .number({ invalid_type_error: "Bedrooms must be a number" })
-    .optional(),
-  bathrooms: z.coerce
-    .number({ invalid_type_error: "Bathrooms must be a number" })
-    .optional(),
-  area: z.coerce.number({
-    required_error: "Area is required",
-    invalid_type_error: "Area must be a number",
-  }),
-  areaUnit: z.enum(["sqft", "sqm", "acres", "hectares"]),
+  city: z.string().min(3, { message: "City is required" }),
+  projectName: z.string().optional(),
+  pincode: z.string().regex(/^[0-9]{6}$/, { message: "Invalid pincode" }),
+  bedrooms: z.string().optional(),
+  bathrooms: z.string().optional(),
+  balconies: z.string().optional(),
+  floorNo: z.string().optional(),
+  totalFloors: z.string().optional(),
+  floorsAllowedForConstruction: z.string().optional(),
+  furnishedStatus: z.string().optional(),
+  roadWidth: z.string().optional(),
+  openSides: z.string().optional(),
+  area: z.coerce.number().min(100, { message: "Minimum area is 100 sqft" }),
+  areaUnit: z.enum([
+    "sqft",
+    "sqyd",
+    "acres",
+    "gunta",
+    "hectare",
+    "marla",
+    "kanal",
+  ]),
   contactName: z.string().min(2, { message: "Contact name is required" }),
   contactPhone: z
     .string()
-    .min(10, { message: "Valid phone number is required" }),
+    .min(10, { message: "Valid 10-digit phone number required" }),
+  whatsappEnabled: z.boolean().default(true),
+  userType: z.enum(["owner", "agent", "builder"]),
+  otp: z.string().optional(),
+  parking: z.string().optional(),
+  facing: z.string().optional(),
+  amenities: z.array(z.string()).optional(),
+  possessionStatus: z.string().optional(),
+  ownershipType: z.string().optional(),
+  boundaryWall: z.string().optional(),
+  electricityStatus: z.string().optional(),
+  waterAvailability: z.string().optional(),
+  flooringType: z.string().optional(),
+  overlooking: z.string().optional(),
+  preferredTenant: z.string().optional(),
+  propertyAge: z.string().optional(),
+  projectStatus: z.string().optional(),
+  launchDate: z.string().optional(),
+  reraRegistered: z.string().optional(),
+  reraNumber: z.string().optional(),
+  landmarks: z.string().optional(),
+  brokerage: z.string().optional(),
+  noBrokerResponses: z.boolean().default(false),
 });
 
 type PropertyFormValues = z.infer<typeof propertySchema>;
+
+// Utility function for ordinal suffixes
+function getOrdinalSuffix(num: number) {
+  const j = num % 10;
+  const k = num % 100;
+  if (j === 1 && k !== 11) return "st";
+  if (j === 2 && k !== 12) return "nd";
+  if (j === 3 && k !== 13) return "rd";
+  return "th";
+}
+
+// Options for various form fields
+const bedroomOptions = [
+  { value: "1", label: "1 Bedroom" },
+  { value: "2", label: "2 Bedrooms" },
+  { value: "3", label: "3 Bedrooms" },
+  { value: "4", label: "4 Bedrooms" },
+  { value: "5", label: "5 Bedrooms" },
+  { value: "6", label: "6 Bedrooms" },
+  { value: "7", label: "7 Bedrooms" },
+  { value: "8", label: "8 Bedrooms" },
+  { value: "9", label: "9 Bedrooms" },
+  { value: "10+", label: "10+ Bedrooms" },
+];
+
+const bathroomOptions = [
+  { value: "1", label: "1 Bathroom" },
+  { value: "2", label: "2 Bathrooms" },
+  { value: "3", label: "3 Bathrooms" },
+  { value: "4", label: "4 Bathrooms" },
+  { value: "5+", label: "5+ Bathrooms" },
+];
+
+const balconyOptions = [
+  { value: "0", label: "No Balcony" },
+  { value: "1", label: "1 Balcony" },
+  { value: "2", label: "2 Balconies" },
+  { value: "3", label: "3 Balconies" },
+  { value: "4", label: "4 Balconies" },
+  { value: "5+", label: "5+ Balconies" },
+];
+
+const floorOptions = [
+  { value: "lower-basement", label: "Lower Basement" },
+  { value: "upper-basement", label: "Upper Basement" },
+  { value: "ground", label: "Ground Floor" },
+  ...Array.from({ length: 20 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: `${i + 1}${getOrdinalSuffix(i + 1)} Floor`,
+  })),
+  { value: "penthouse", label: "Penthouse" },
+];
+
+const roadWidthOptions = [
+  { value: "10", label: "10 ft" },
+  { value: "20", label: "20 ft" },
+  { value: "30", label: "30 ft" },
+  { value: "40", label: "40 ft" },
+  { value: "50", label: "50 ft" },
+  { value: "60", label: "60 ft" },
+  { value: "70", label: "70 ft" },
+  { value: "80", label: "80 ft" },
+  { value: "90", label: "90 ft" },
+  { value: "100+", label: "100+ ft" },
+];
+
+const openSidesOptions = [
+  { value: "1", label: "1 Side" },
+  { value: "2", label: "2 Sides" },
+  { value: "3", label: "3 Sides" },
+  { value: "4", label: "4 Sides" },
+];
+
+const constructionAgeOptions = [
+  { value: "new", label: "New Construction" },
+  { value: "less-than-5", label: "Less than 5 Years" },
+  { value: "5-to-10", label: "5 to 10 Years" },
+  { value: "greater-than-10", label: "Greater than 10 Years" },
+];
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const years = Array.from(
+  { length: 10 },
+  (_, i) => new Date().getFullYear() + i,
+);
+
+const furnishedStatusOptions = [
+  { value: "furnished", label: "Furnished" },
+  { value: "unfurnished", label: "Unfurnished" },
+  { value: "semi-furnished", label: "Semi-Furnished" },
+];
+
+const parkingOptions = [
+  { value: "none", label: "No Parking" },
+  { value: "open", label: "Open Parking" },
+  { value: "covered", label: "Covered Parking" },
+  { value: "basement", label: "Basement Parking" },
+  { value: "multiple", label: "Multiple Parking" },
+];
+
+const facingOptions = [
+  { value: "east", label: "East" },
+  { value: "west", label: "West" },
+  { value: "north", label: "North" },
+  { value: "south", label: "South" },
+  { value: "north-east", label: "North-East" },
+  { value: "north-west", label: "North-West" },
+  { value: "south-east", label: "South-East" },
+  { value: "south-west", label: "South-West" },
+];
+
+const amenitiesOptions = [
+  {
+    value: "power-backup",
+    label: "Power Backup",
+    icon: <Zap className="h-4 w-4" />,
+  },
+  { value: "lift", label: "Lift", icon: <Building className="h-4 w-4" /> },
+  {
+    value: "security",
+    label: "24/7 Security",
+    icon: <ShieldCheck className="h-4 w-4" />,
+  },
+  {
+    value: "water-supply",
+    label: "24/7 Water Supply",
+    icon: <Droplets className="h-4 w-4" />,
+  },
+  {
+    value: "parking",
+    label: "Parking",
+    icon: <ParkingSquare className="h-4 w-4" />,
+  },
+  {
+    value: "swimming-pool",
+    label: "Swimming Pool",
+    icon: <Waves className="h-4 w-4" />,
+  },
+  { value: "gym", label: "Gym", icon: <Dumbbell className="h-4 w-4" /> },
+  {
+    value: "club-house",
+    label: "Club House",
+    icon: <Landmark className="h-4 w-4" />,
+  },
+  {
+    value: "play-area",
+    label: "Play Area",
+    icon: <Landmark className="h-4 w-4" />,
+  },
+  {
+    value: "garden",
+    label: "Garden/Park",
+    icon: <TreePine className="h-4 w-4" />,
+  },
+  { value: "wifi", label: "Wi-Fi", icon: <Wifi className="h-4 w-4" /> },
+  {
+    value: "modular-kitchen",
+    label: "Modular Kitchen",
+    icon: <Utensils className="h-4 w-4" />,
+  },
+  {
+    value: "wardrobes",
+    label: "Wardrobes",
+    icon: <Armchair className="h-4 w-4" />,
+  },
+  {
+    value: "furniture",
+    label: "Furniture",
+    icon: <Sofa className="h-4 w-4" />,
+  },
+];
+
+const possessionStatusOptions = [
+  { value: "ready-to-move", label: "Ready to Move" },
+  { value: "under-construction", label: "Under Construction" },
+  { value: "new-launch", label: "New Launch" },
+];
+
+const ownershipTypeOptions = [
+  { value: "freehold", label: "Freehold" },
+  { value: "leasehold", label: "Leasehold" },
+  { value: "cooperative", label: "Cooperative Society" },
+];
+
+const boundaryWallOptions = [
+  { value: "none", label: "No Boundary Wall" },
+  { value: "partial", label: "Partial Boundary" },
+  { value: "complete", label: "Complete Boundary" },
+];
+
+const electricityStatusOptions = [
+  { value: "no-power", label: "No Power" },
+  { value: "partial-power", label: "Partial Power" },
+  { value: "full-power", label: "Full Power" },
+];
+
+const waterAvailabilityOptions = [
+  { value: "no-water", label: "No Water" },
+  { value: "borewell", label: "Borewell" },
+  { value: "municipal", label: "Municipal Supply" },
+  { value: "both", label: "Both Borewell & Municipal" },
+];
+
+const flooringTypeOptions = [
+  { value: "marble", label: "Marble" },
+  { value: "tiles", label: "Tiles" },
+  { value: "wood", label: "Wooden" },
+  { value: "granite", label: "Granite" },
+  { value: "cement", label: "Cement" },
+  { value: "other", label: "Other" },
+];
+
+const overlookingOptions = [
+  {
+    value: "garden",
+    label: "Garden/Park",
+    icon: <TreePine className="h-4 w-4" />,
+  },
+  { value: "main-road", label: "Main Road" },
+  { value: "pool", label: "Swimming Pool" },
+  { value: "lake", label: "Lake/River" },
+  { value: "other", label: "Other" },
+];
+
+const preferredTenantOptions = [
+  { value: "family", label: "Family" },
+  { value: "bachelors", label: "Bachelors" },
+  { value: "company", label: "Company" },
+  { value: "any", label: "Anyone" },
+];
+
+const propertyAgeOptions = [
+  { value: "0-1", label: "0-1 Years" },
+  { value: "1-5", label: "1-5 Years" },
+  { value: "5-10", label: "5-10 Years" },
+  { value: "10+", label: "10+ Years" },
+];
+
+const projectStatusOptions = [
+  { value: "planning", label: "Planning Stage" },
+  { value: "under-construction", label: "Under Construction" },
+  { value: "completed", label: "Completed" },
+];
+
+const brokerageOptions = [
+  { value: "0", label: "No Brokerage" },
+  { value: "0.25", label: "0.25%" },
+  { value: "0.5", label: "0.5%" },
+  { value: "0.75", label: "0.75%" },
+  { value: "1", label: "1%" },
+  { value: "1.5", label: "1.5%" },
+  { value: "2", label: "2%" },
+  { value: "3", label: "3%" },
+  { value: "4", label: "4%" },
+  { value: "5", label: "5%" },
+];
+
+// Property type options by category
+const propertyTypeOptions = {
+  residential: [
+    {
+      value: "flat-apartment",
+      label: "Flat/Apartment",
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      value: "residential-house",
+      label: "Residential House",
+      icon: <Home className="h-4 w-4" />,
+    },
+    { value: "villa", label: "Villa", icon: <Home className="h-4 w-4" /> },
+    {
+      value: "builder-floor",
+      label: "Builder Floor Apartment",
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      value: "residential-land",
+      label: "Residential Land/Plot",
+      icon: <Square className="h-4 w-4" />,
+    },
+    {
+      value: "penthouse",
+      label: "Penthouse",
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      value: "studio-apartment",
+      label: "Studio Apartment",
+      icon: <Building className="h-4 w-4" />,
+    },
+  ],
+  commercial: [
+    {
+      value: "commercial-office",
+      label: "Commercial Office Space",
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      value: "it-park-office",
+      label: "Office in IT Park/SEZ",
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      value: "commercial-shop",
+      label: "Commercial Shop",
+      icon: <Store className="h-4 w-4" />,
+    },
+    {
+      value: "commercial-showroom",
+      label: "Commercial Showroom",
+      icon: <Store className="h-4 w-4" />,
+    },
+    {
+      value: "commercial-land",
+      label: "Commercial Land",
+      icon: <Square className="h-4 w-4" />,
+    },
+    {
+      value: "warehouse",
+      label: "Warehouse/Godown",
+      icon: <Warehouse className="h-4 w-4" />,
+    },
+    {
+      value: "industrial-land",
+      label: "Industrial Land",
+      icon: <Square className="h-4 w-4" />,
+    },
+    {
+      value: "industrial-building",
+      label: "Industrial Building",
+      icon: <Factory className="h-4 w-4" />,
+    },
+    {
+      value: "industrial-shed",
+      label: "Industrial Shed",
+      icon: <Fence className="h-4 w-4" />,
+    },
+  ],
+  agricultural: [
+    {
+      value: "agricultural-land",
+      label: "Agricultural/Farm Land",
+      icon: <Square className="h-4 w-4" />,
+    },
+    {
+      value: "farm-house",
+      label: "Farm House",
+      icon: <Home className="h-4 w-4" />,
+    },
+  ],
+};
+
+// Transaction type options by user type and property type
+const getTransactionTypeOptions = (userType: string, propertyType: string) => {
+  const baseOptions = [
+    { value: "new", label: "New Property", icon: <Home className="h-4 w-4" /> },
+    {
+      value: "resale",
+      label: "Resale",
+      icon: <RefreshCw className="h-4 w-4" />,
+    },
+  ];
+
+  if (userType === "builder") {
+    return [
+      ...baseOptions,
+      {
+        value: "under-construction",
+        label: "Under Construction",
+        icon: <HardHat className="h-4 w-4" />,
+      },
+      {
+        value: "ready-to-move",
+        label: "Ready to Move",
+        icon: <Key className="h-4 w-4" />,
+      },
+    ];
+  }
+
+  if (
+    propertyType === "residential-land" ||
+    propertyType === "commercial-land" ||
+    propertyType === "agricultural-land"
+  ) {
+    return baseOptions.filter((opt) => opt.value !== "new");
+  }
+
+  return baseOptions;
+};
+
+// Area unit options by property type
+const getAreaUnitOptions = (propertyType: string) => {
+  const baseUnits = [
+    { value: "sqft", label: "sq.ft" },
+    { value: "sqyd", label: "sq.yd" },
+  ];
+
+  if (
+    propertyType === "agricultural-land" ||
+    propertyType === "residential-land" ||
+    propertyType === "commercial-land"
+  ) {
+    return [
+      ...baseUnits,
+      { value: "acres", label: "acres" },
+      { value: "gunta", label: "gunta" },
+      { value: "hectare", label: "hectare" },
+      { value: "marla", label: "marla" },
+      { value: "kanal", label: "kanal" },
+    ];
+  }
+
+  return baseUnits;
+};
 
 export default function PostPropertyFree() {
   const { user } = useAuth();
   const [_, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const formTopRef = useRef<HTMLDivElement>(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const [formSubmitted, setFormSubmitted] = useState(false);
-  const [propertyImages, setPropertyImages] = useState<FileWithPreview[]>([]);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [exteriorImages, setExteriorImages] = useState<FileWithPreview[]>([]);
+  const [livingRoomImages, setLivingRoomImages] = useState<FileWithPreview[]>(
+    [],
+  );
+  const [kitchenImages, setKitchenImages] = useState<FileWithPreview[]>([]);
+  const [bedroomImages, setBedroomImages] = useState<FileWithPreview[]>([]);
+  const [bathroomImages, setBathroomImages] = useState<FileWithPreview[]>([]);
+  const [floorPlanImages, setFloorPlanImages] = useState<FileWithPreview[]>([]);
+  const [masterPlanImages, setMasterPlanImages] = useState<FileWithPreview[]>(
+    [],
+  );
+  const [locationMapImages, setLocationMapImages] = useState<FileWithPreview[]>(
+    [],
+  );
+  const [otherImages, setOtherImages] = useState<FileWithPreview[]>([]);
+  const [videoFiles, setVideoFiles] = useState<FileWithPreview[]>([]);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [activeImageTab, setActiveImageTab] = useState("exterior");
+  const formTopRef = useRef<HTMLDivElement>(null);
 
-  // Set up the mutation for submitting property data
-  const createPropertyMutation = useMutation({
-    mutationFn: (propertyData: any) => {
-      console.log("Submitting property data:", propertyData);
-
-      // Convert JSON dates that might cause issues with API
-      const cleanedData = {
-        ...propertyData,
-        // Convert Date objects to ISO strings to avoid Date serialization issues
-        expiresAt: propertyData.expiresAt
-          ? propertyData.expiresAt.toISOString()
-          : null,
-      };
-
-      return apiRequest({
-        url: "/api/properties",
-        method: "POST",
-        body: cleanedData,
-      });
-    },
-    onSuccess: () => {
-      // Invalidate queries to refresh property lists
-      queryClient.invalidateQueries({ queryKey: ["/api/properties"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/properties/featured"] });
-
-      // Show success toast
-      toast({
-        title: "Property Listed Successfully",
-        description:
-          "Your property has been posted for free. It will be visible once approved.",
-        variant: "default",
-      });
-
-      // Navigate to dashboard after success
-      navigate("/dashboard");
-    },
-    onError: (error: any) => {
-      console.error("Error submitting property:", error);
-
-      // Check if it's a premium feature error
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.code === "PREMIUM_REQUIRED"
-      ) {
-        toast({
-          title: "Premium Feature Required",
-          description:
-            "Urgency sale listings are only available for premium members. Please upgrade your subscription to use this feature.",
-          variant: "destructive",
-        });
-
-        // Go back to first step where urgency sale option is
-        setCurrentStep(1);
-      } else {
-        // Enhanced error handling - extract server error message if available
-        let errorMessage = "Unknown error occurred";
-
-        if (error.response && error.response.data) {
-          if (error.response.data.error) {
-            errorMessage = error.response.data.error;
-          } else if (error.response.data.message) {
-            errorMessage = error.response.data.message;
-          }
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-
-        // Generic error handling
-        toast({
-          title: "Error Submitting Property",
-          description: `Failed to submit property: ${errorMessage}`,
-          variant: "destructive",
-        });
-      }
-
-      setFormSubmitted(false);
-    },
-  });
-
-  // Form setup with validation
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       title: "",
       description: "",
-      propertyType: "apartment",
-      forSaleOrRent: "sale",
-      price: 0,
+      propertyType: "",
+      propertyCategory: "",
+      transactionType: "",
+      price: undefined,
+      pricePerUnit: undefined,
+      totalPrice: undefined,
       isUrgentSale: false,
       location: "",
+      city: "",
+      projectName: "",
       pincode: "",
-      bedrooms: undefined,
-      bathrooms: undefined,
-      area: 0,
+      bedrooms: "",
+      bathrooms: "",
+      balconies: "",
+      floorNo: "",
+      totalFloors: "",
+      floorsAllowedForConstruction: "",
+      furnishedStatus: "",
+      roadWidth: "",
+      openSides: "",
+      area: undefined,
       areaUnit: "sqft",
       contactName: user?.name || "",
-      contactPhone: "",
+      contactPhone: user?.phone || "",
+      whatsappEnabled: true,
+      userType: "owner",
+      otp: "",
+      parking: "",
+      facing: "",
+      amenities: [],
+      possessionStatus: "",
+      ownershipType: "",
+      boundaryWall: "",
+      electricityStatus: "",
+      waterAvailability: "",
+      flooringType: "",
+      overlooking: "",
+      preferredTenant: "",
+      propertyAge: "",
+      projectStatus: "",
+      launchDate: "",
+      reraRegistered: "",
+      reraNumber: "",
+      landmarks: "",
+      brokerage: "0",
+      noBrokerResponses: false,
     },
-    mode: "onBlur", // Validate fields when they lose focus
   });
 
-  // Redirect to auth page if not logged in
+  const userType = form.watch("userType");
+  const propertyCategory = form.watch("propertyCategory");
+  const propertyType = form.watch("propertyType");
+  const transactionType = form.watch("transactionType");
+  const area = form.watch("area");
+  const price = form.watch("price");
+  const pricePerUnit = form.watch("pricePerUnit");
+  const totalPrice = form.watch("totalPrice");
+
+  // Stable price calculation
   useEffect(() => {
-    if (!user) {
+    if (area && pricePerUnit) {
+      const calculatedTotal = Math.round(pricePerUnit * area);
+      form.setValue("totalPrice", calculatedTotal, { shouldValidate: true });
+      form.setValue("price", calculatedTotal, { shouldValidate: true });
+    }
+  }, [area, pricePerUnit, form]);
+
+  useEffect(() => {
+    if (area && totalPrice) {
+      const calculatedPerUnit = Math.round(totalPrice / area);
+      form.setValue("pricePerUnit", calculatedPerUnit, {
+        shouldValidate: true,
+      });
+      form.setValue("price", totalPrice, { shouldValidate: true });
+    }
+  }, [area, totalPrice, form]);
+
+  // Reset property type when category changes
+  useEffect(() => {
+    if (propertyCategory) {
+      form.setValue("propertyType", "");
+    }
+  }, [propertyCategory, form]);
+
+  const sendOtp = async (phone: string) => {
+    setIsSendingOtp(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       toast({
-        title: "Login Required",
-        description: "You need to login before posting a property.",
+        title: "OTP Sent",
+        description: `We've sent a 6-digit OTP to ${phone}`,
         variant: "default",
       });
-      navigate("/auth");
-    } else {
-      setShowLoginModal(false);
-      // Pre-fill user name if available
-      form.setValue("contactName", user.name || "");
+      return true;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send OTP. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setIsSendingOtp(false);
     }
-  }, [user, form, toast, navigate]);
-
-  // Function to scroll to top of form
-  const scrollToForm = () => {
-    formTopRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Handle login button click
-  const handleLoginClick = () => {
-    navigate("/auth");
+  const verifyOtp = async (otp: string) => {
+    // Simulate verification - in production, call your backend
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return otp === "123456"; // Demo only
   };
 
-  // Handle image files selection
-  const handleFilesSelected = (files: FileWithPreview[]) => {
-    setPropertyImages(files);
-  };
-
-  // Handle image file removal
-  const handleFileRemoved = (fileId: string) => {
-    setPropertyImages((prev) => prev.filter((file) => file.id !== fileId));
-  };
-
-  // Function to get user's current location for the property address
-  const getUserLocation = () => {
+  const detectLocation = async () => {
     if (!navigator.geolocation) {
       toast({
-        title: "Location Not Available",
-        description: "Geolocation is not supported by your browser",
+        title: "Geolocation not supported",
+        description: "Your browser does not support geolocation",
         variant: "destructive",
       });
       return;
     }
 
-    // Show loading toast
-    toast({
-      title: "Getting Location",
-      description: "Please wait while we fetch your current location...",
-    });
+    setIsDetectingLocation(true);
+    try {
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        },
+      );
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          // Get latitude and longitude
-          const { latitude, longitude } = position.coords;
+      // Simulate reverse geocoding - in production, use a geocoding service
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-          // Use reverse geocoding to get the address
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-          );
+      // Get approximate address from coordinates
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+      );
+      const data = await response.json();
 
-          if (response.ok) {
-            const data = await response.json();
+      if (data.address) {
+        const { city, town, village, county, state, postcode } = data.address;
+        const detectedCity = city || town || village || county;
+        const detectedLocation = [
+          data.address.road,
+          data.address.suburb,
+          detectedCity,
+        ]
+          .filter(Boolean)
+          .join(", ");
 
-            // Construct a full address from the response
-            const road = data.address.road || "";
-            const suburb =
-              data.address.suburb || data.address.neighbourhood || "";
-            const city =
-              data.address.city ||
-              data.address.town ||
-              data.address.village ||
-              "";
-            const state = data.address.state || "";
-            const postcode = data.address.postcode || "";
+        form.setValue("city", detectedCity || "");
+        form.setValue("location", detectedLocation || "");
+        form.setValue("pincode", postcode || "");
 
-            // Format the address
-            const address = `${road}, ${suburb}, ${city}, ${state}`
-              .replace(/^, |, $/g, "")
-              .replace(/,\s*,/g, ",");
-
-            // Update the form fields
-            form.setValue("location", address);
-            if (postcode) {
-              form.setValue("pincode", postcode);
-            }
-
-            toast({
-              title: "Location Retrieved",
-              description:
-                "Your current location has been filled in the address field.",
-              variant: "default",
-            });
-          } else {
-            throw new Error("Failed to get address from coordinates");
-          }
-        } catch (error) {
-          console.error("Error getting location:", error);
-          toast({
-            title: "Location Error",
-            description:
-              "Unable to fetch your location details. Please enter manually.",
-            variant: "destructive",
-          });
-        }
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
         toast({
-          title: "Location Error",
-          description:
-            "Unable to get your location. Please ensure location services are enabled.",
-          variant: "destructive",
+          title: "Location detected",
+          description: `Your location has been set to ${detectedLocation}`,
+          variant: "default",
         });
-      },
-    );
+      } else {
+        throw new Error("Could not determine address");
+      }
+    } catch (error) {
+      toast({
+        title: "Location detection failed",
+        description:
+          "Could not determine your location. Please enter manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDetectingLocation(false);
+    }
   };
 
-  // Handle form submission
-  const onSubmit = async (data: PropertyFormValues) => {
-    if (!user) {
+  const { mutate: submitProperty, isLoading } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      return apiRequest({
+        url: "/api/properties",
+        method: "POST",
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    },
+    onSuccess: () => {
       toast({
-        title: "Login Required",
-        description: "You need to login before posting a property.",
+        title: "Success",
+        description: "Property listed successfully!",
         variant: "default",
       });
-      navigate("/auth");
-      return;
-    }
-
-    // Check if at least one image is uploaded
-    if (propertyImages.length === 0) {
+      queryClient.invalidateQueries(["properties"]);
+      navigate("/my-properties");
+    },
+    onError: (error: any) => {
       toast({
-        title: "Images Required",
-        description: "Please upload at least one image of your property",
-        variant: "destructive",
-      });
-      setCurrentStep(4); // Go back to images step
-      return;
-    }
-
-    // Premium-only check for urgency sales (double security check)
-    if (data.isUrgentSale && user.subscriptionLevel !== "premium") {
-      toast({
-        title: "Premium Feature",
+        title: "Error",
         description:
-          "Urgency Sale is only available for premium members. Please upgrade your subscription.",
+          error?.response?.data?.message || "Failed to list property",
         variant: "destructive",
       });
-      setCurrentStep(1); // Go back to first step
+    },
+  });
+
+  const onSubmit = async (data: PropertyFormValues) => {
+    if (data.whatsappEnabled && !otpVerified) {
+      const otpSent = await sendOtp(data.contactPhone);
+      if (otpSent) {
+        setShowOtpModal(true);
+      }
       return;
     }
 
     try {
-      // Create a complete property object with form data and images
-      const price = data.price;
+      const formData = new FormData();
 
-      // Additional validations
-      if (price <= 0) {
-        toast({
-          title: "Invalid Price",
-          description: "Please enter a valid price greater than 0",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data.area <= 0) {
-        toast({
-          title: "Invalid Area",
-          description: "Please enter a valid area greater than 0",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Basic city extraction from location
-      let city = "";
-      if (data.location && data.location.includes(",")) {
-        const parts = data.location.split(",");
-        // Use the last non-empty part as the city
-        for (let i = parts.length - 1; i >= 0; i--) {
-          const trimmedPart = parts[i].trim();
-          if (trimmedPart) {
-            city = trimmedPart;
-            break;
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && key !== "otp") {
+          if (Array.isArray(value)) {
+            value.forEach((v) => formData.append(key, v));
+          } else {
+            formData.append(key, value.toString());
           }
         }
-      }
-
-      // Since we're using z.coerce.number() in the schema, values are already converted to numbers
-
-      // Prepare expiry date for urgency sales
-      const expiresAt = data.isUrgentSale
-        ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        : null;
-
-      // First upload all files and collect their server URLs
-      const imageUrls: string[] = [];
-      const videoUrls: string[] = [];
-
-      // Show a loading toast
-      toast({
-        title: "Uploading Files",
-        description: "Please wait while we upload your property images...",
       });
 
-      try {
-        // Process each file in propertyImages
-        for (const file of propertyImages) {
-          // Skip files that already have a server URL
-          if (file.serverUrl) {
-            if (file.type?.startsWith("video/")) {
-              videoUrls.push(file.serverUrl);
-            } else {
-              imageUrls.push(file.serverUrl);
-            }
-            continue;
-          }
+      // Add all images and videos to formData
+      const allFiles = [
+        ...exteriorImages,
+        ...livingRoomImages,
+        ...kitchenImages,
+        ...bedroomImages,
+        ...bathroomImages,
+        ...floorPlanImages,
+        ...masterPlanImages,
+        ...locationMapImages,
+        ...otherImages,
+        ...videoFiles,
+      ];
 
-          // Create form data for the file
-          const formData = new FormData();
-          formData.append("files", file);
+      allFiles.forEach((file) => {
+        formData.append("media", file.file);
+      });
 
-          // Upload the file to the server
-          const response = await fetch("/api/upload/property-images", {
-            method: "POST",
-            body: formData,
-            credentials: "include",
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            if (result.files && result.files.length > 0) {
-              const serverUrl = result.files[0];
-
-              // Add to the appropriate array based on file type
-              if (file.type?.startsWith("video/")) {
-                videoUrls.push(serverUrl);
-              } else {
-                imageUrls.push(serverUrl);
-              }
-
-              // Update file status in state
-              setPropertyImages((prev) =>
-                prev.map((f) =>
-                  f.id === file.id
-                    ? {
-                        ...f,
-                        serverUrl,
-                        status: "success" as const,
-                        uploadProgress: 100,
-                      }
-                    : f,
-                ),
-              );
-            }
-          } else {
-            console.error("File upload failed:", file.name);
-            // Mark the file as having an error
-            setPropertyImages((prev) =>
-              prev.map((f) =>
-                f.id === file.id
-                  ? {
-                      ...f,
-                      status: "error" as const,
-                      errorMessage: "Upload failed",
-                    }
-                  : f,
-              ),
-            );
-
-            // Show error toast
-            toast({
-              title: "Upload Failed",
-              description: `Failed to upload ${file.name}. Please try again.`,
-              variant: "destructive",
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error during file uploads:", error);
-        toast({
-          title: "Upload Error",
-          description:
-            "There was a problem uploading your files. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check if at least one image was uploaded successfully
-      if (imageUrls.length === 0) {
-        toast({
-          title: "No Images",
-          description:
-            "Please upload at least one property image that could be processed successfully.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Prepare property data with the uploaded file URLs
-      const propertyData = {
-        title: data.title,
-        description: data.description,
-        propertyType: data.propertyType,
-        rentOrSale: data.forSaleOrRent.toLowerCase(), // Using schema field name
-        price: price,
-        // If urgency sale, calculate 25% discount (only for premium users)
-        discountedPrice: data.isUrgentSale ? Math.round(price * 0.75) : null,
-        location: data.location,
-        city: city || "Unknown",
-        address: data.location, // Using location as address too
-        pincode: data.pincode,
-        bedrooms: data.bedrooms,
-        bathrooms: data.bathrooms,
-        area: data.area,
-        imageUrls: imageUrls,
-        videoUrls: videoUrls,
-        amenities: [], // Empty array for now
-        contactName: data.contactName,
-        contactPhone: data.contactPhone,
-        subscriptionLevel: user.subscriptionLevel || "free",
-        status: "available", // Setting initial status
-        approvalStatus: "pending",
-        // Set expiry date for urgency listings (7 days from now)
-        expiresAt: expiresAt,
-        userId: user.id, // Required field
-      };
-
-      console.log(
-        "Property data submitted:",
-        JSON.stringify(propertyData, null, 2),
-      );
-      setFormSubmitted(true);
-
-      // Submit to the backend
-      createPropertyMutation.mutate(propertyData);
+      submitProperty(formData);
     } catch (error) {
-      console.error("Error preparing property data:", error);
+      console.error("Error submitting property:", error);
       toast({
         title: "Error",
-        description:
-          "An error occurred while preparing your property data. Please try again.",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
-      setFormSubmitted(false);
     }
   };
 
-  // How it works steps
-  const howItWorksSteps = [
-    {
-      id: 1,
-      title: "List Your Property",
-      description:
-        "Fill in your property details, add photos, and submit your free listing in just a few minutes.",
-      icon: <Home className="h-8 w-8 text-primary" />,
-    },
-    {
-      id: 2,
-      title: "Get Verified",
-      description:
-        "Our team reviews your listing to ensure it meets quality standards for better visibility.",
-      icon: <BadgeCheck className="h-8 w-8 text-primary" />,
-    },
-    {
-      id: 3,
-      title: "Connect with Buyers",
-      description:
-        "Receive direct inquiries from interested buyers without any broker interference.",
-      icon: <MessageSquare className="h-8 w-8 text-primary" />,
-    },
-    {
-      id: 4,
-      title: "Finalize Your Deal",
-      description:
-        "Meet potential buyers, negotiate directly, and close the deal on your terms.",
-      icon: <Check className="h-8 w-8 text-primary" />,
-    },
-  ];
-
-  // Testimonials data
-  const testimonials = [
-    {
-      id: 1,
-      name: "Raj Sharma",
-      role: "Property Owner",
-      location: "Mumbai",
-      content:
-        "I sold my apartment within just 3 weeks of listing it here. The process was extremely smooth and I got a great price without paying any broker fees!",
-      avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-    },
-    {
-      id: 2,
-      name: "Priya Mehta",
-      role: "Real Estate Dealer",
-      location: "Delhi",
-      content:
-        "As a dealer, this platform has helped me connect with serious buyers directly. The listing process is straightforward and the support team is very responsive.",
-      avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-    },
-    {
-      id: 3,
-      name: "Vikram Singh",
-      role: "Property Owner",
-      location: "Bangalore",
-      content:
-        "Listed my commercial property and received multiple inquiries within days. The verification process adds credibility to my listing.",
-      avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-    },
-    {
-      id: 4,
-      name: "Aisha Patel",
-      role: "Property Owner",
-      location: "Pune",
-      content:
-        "As a first-time seller, I found the platform extremely user-friendly. The step-by-step listing process guided me perfectly, and I received multiple inquiries within days.",
-      avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-    },
-    {
-      id: 5,
-      name: "Rahul Khanna",
-      role: "Real Estate Agent",
-      location: "Chennai",
-      content:
-        "The analytics and insights provided for my listings help me understand what buyers are looking for. This has dramatically improved my sales conversion rate.",
-      avatar: "https://randomuser.me/api/portraits/men/5.jpg",
-    },
-  ];
-
-  // Current testimonial index for carousel
-  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
-
-  const nextTestimonial = () => {
-    setCurrentTestimonialIndex((prevIndex) =>
-      prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1,
-    );
+  const handleOtpSubmit = async (otp: string) => {
+    const isValid = await verifyOtp(otp);
+    if (isValid) {
+      setOtpVerified(true);
+      setShowOtpModal(false);
+      form.handleSubmit(onSubmit)();
+    } else {
+      toast({
+        title: "Invalid OTP",
+        description: "The OTP you entered is incorrect. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const prevTestimonial = () => {
-    setCurrentTestimonialIndex((prevIndex) =>
-      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1,
-    );
-  };
-
-  // Form steps - divide property listing form into manageable sections
-  const renderFormByStep = () => {
+  const renderFormStep = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-4">
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">
-                Basic Property Information
-              </h3>
-              <Separator />
-            </div>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Property Details
+            </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="userType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">You Are*</FormLabel>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="grid grid-cols-3 gap-4"
+                  >
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="owner" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4" /> Owner
+                        </div>
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="agent" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        <div className="flex items-center gap-2">
+                          <Badge className="h-4 w-4" /> Agent
+                        </div>
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="builder" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        <div className="flex items-center gap-2">
+                          <Building className="h-4 w-4" /> Builder
+                        </div>
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="propertyCategory"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">
+                    Property Category*
+                  </FormLabel>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="grid grid-cols-3 gap-4"
+                  >
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="residential" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        <div className="flex items-center gap-2">
+                          <Home className="h-4 w-4" /> Residential
+                        </div>
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="commercial" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        <div className="flex items-center gap-2">
+                          <Store className="h-4 w-4" /> Commercial
+                        </div>
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <RadioGroupItem value="agricultural" />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        <div className="flex items-center gap-2">
+                          <TreePine className="h-4 w-4" /> Agricultural
+                        </div>
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {propertyCategory && (
               <FormField
                 control={form.control}
-                name="title"
+                name="propertyType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property Title</FormLabel>
+                    <FormLabel className="text-gray-700">
+                      Property Type*
+                    </FormLabel>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="grid grid-cols-2 md:grid-cols-3 gap-4"
+                    >
+                      {propertyTypeOptions[
+                        propertyCategory as keyof typeof propertyTypeOptions
+                      ]?.map((option) => (
+                        <FormItem
+                          key={option.value}
+                          className="flex items-center space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <RadioGroupItem
+                              value={option.value}
+                              id={option.value}
+                            />
+                          </FormControl>
+                          <FormLabel
+                            htmlFor={option.value}
+                            className="font-normal flex items-center gap-2"
+                          >
+                            {option.icon || <Square className="h-4 w-4" />}
+                            {option.label}
+                          </FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {propertyType && (
+              <FormField
+                control={form.control}
+                name="transactionType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">
+                      Transaction Type*
+                    </FormLabel>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                    >
+                      {getTransactionTypeOptions(userType, propertyType).map(
+                        (option) => (
+                          <FormItem
+                            key={option.value}
+                            className="flex items-center space-x-3 space-y-0"
+                          >
+                            <FormControl>
+                              <RadioGroupItem
+                                value={option.value}
+                                id={`transaction-${option.value}`}
+                              />
+                            </FormControl>
+                            <FormLabel
+                              htmlFor={`transaction-${option.value}`}
+                              className="font-normal flex items-center gap-2"
+                            >
+                              {option.icon || <Square className="h-4 w-4" />}
+                              {option.label}
+                            </FormLabel>
+                          </FormItem>
+                        ),
+                      )}
+                    </RadioGroup>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {transactionType === "under-construction" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="availableFromMonth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Available From (Month)*
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select month" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {months.map((month) => (
+                            <SelectItem key={month} value={month.toLowerCase()}>
+                              {month}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="availableFromYear"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Available From (Year)*
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {years.map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {transactionType === "ready-to-move" && (
+              <FormField
+                control={form.control}
+                name="constructionAge"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">
+                      Age of Construction*
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select age of construction" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {constructionAgeOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">
+                    Listing Title*
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={
+                        propertyType === "flat-apartment"
+                          ? "e.g. Beautiful 3BHK Apartment in Gachibowli"
+                          : propertyType === "residential-land"
+                            ? "e.g. Prime Residential Plot in Hitech City"
+                            : propertyType === "commercial-office"
+                              ? "e.g. Premium Office Space in Financial District"
+                              : "e.g. Well-maintained property in prime location"
+                      }
+                      className="h-12"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Be specific about location and key features
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">
+                    Detailed Description
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={
+                        propertyType === "flat-apartment"
+                          ? "Describe the apartment layout, amenities, society features, nearby facilities..."
+                          : propertyType === "residential-land"
+                            ? "Describe the plot dimensions, location advantages, nearby developments..."
+                            : propertyType === "commercial-office"
+                              ? "Describe the office space, facilities, parking, nearby business hubs..."
+                              : "Describe your property in detail..."
+                      }
+                      rows={5}
+                      className="min-h-[120px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Include amenities, nearby facilities, and unique features
+                    (optional)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Dynamic fields based on property type */}
+            {propertyCategory === "residential" &&
+              !["residential-land", "studio-apartment"].includes(
+                propertyType,
+              ) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="bedrooms"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Bedrooms*
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select bedrooms" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {bedroomOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="bathrooms"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Bathrooms*
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select bathrooms" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {bathroomOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="balconies"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Balconies
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select balconies" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {balconyOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+            {propertyCategory === "residential" &&
+              propertyType === "studio-apartment" && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-blue-800 text-sm">
+                    Studio apartments typically have 1 bathroom and no separate
+                    bedrooms.
+                  </p>
+                </div>
+              )}
+
+            {propertyCategory === "residential" &&
+              !["residential-land", "studio-apartment"].includes(
+                propertyType,
+              ) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="floorNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Floor No.
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select floor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {floorOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="totalFloors"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Total Floors
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select total floors" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Array.from({ length: 20 }, (_, i) => i + 1).map(
+                              (num) => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} Floors
+                                </SelectItem>
+                              ),
+                            )}
+                            <SelectItem value="20+">20+ Floors</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="furnishedStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Furnished Status
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {furnishedStatusOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
+
+            {(propertyType === "residential-land" ||
+              propertyType === "commercial-land" ||
+              propertyType === "agricultural-land") && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="roadWidth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Width of Road Facing the Plot
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select road width" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roadWidthOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="openSides"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Number of Open Sides
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select open sides" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {openSidesOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {/* Additional fields for commercial properties */}
+            {propertyCategory === "commercial" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="possessionStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Possession Status
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select possession status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {possessionStatusOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="ownershipType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Ownership Type
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select ownership type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ownershipTypeOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {/* Additional fields for agricultural properties */}
+            {propertyCategory === "agricultural" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="boundaryWall"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Boundary Wall
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select boundary wall status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {boundaryWallOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="electricityStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Electricity Status
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select electricity status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {electricityStatusOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="area"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Area*</FormLabel>
+                    <div className="flex">
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="e.g. 1500"
+                          className="h-12 rounded-r-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormField
+                        control={form.control}
+                        name="areaUnit"
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="h-12 w-[100px] rounded-l-none border-l-0">
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {getAreaUnitOptions(propertyType).map((unit) => (
+                                <SelectItem key={unit.value} value={unit.value}>
+                                  {unit.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pricePerUnit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">
+                      Price per Sq-ft (₹)*
+                    </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="3 BHK Apartment in Downtown"
+                        type="number"
+                        placeholder="e.g. 5000"
+                        className="h-12"
                         {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value);
+                          if (area && value) {
+                            form.setValue(
+                              "totalPrice",
+                              Math.round(parseFloat(value) * area),
+                              { shouldValidate: true },
+                            );
+                            form.setValue(
+                              "price",
+                              Math.round(parseFloat(value) * area),
+                              { shouldValidate: true },
+                            );
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="totalPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">
+                      Total Price (₹)*
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 7500000"
+                        className="h-12"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value);
+                          if (area && value) {
+                            form.setValue(
+                              "pricePerUnit",
+                              Math.round(parseFloat(value) / area),
+                              { shouldValidate: true },
+                            );
+                            form.setValue("price", parseFloat(value), {
+                              shouldValidate: true,
+                            });
+                          }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -724,130 +1791,28 @@ export default function PostPropertyFree() {
 
               <FormField
                 control={form.control}
-                name="propertyType"
+                name="parking"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <FormLabel className="text-gray-700">Parking</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select property type" />
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Select parking type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="apartment">Apartment</SelectItem>
-                        <SelectItem value="villa">Villa</SelectItem>
-                        <SelectItem value="house">House</SelectItem>
-                        <SelectItem value="plot">Plot</SelectItem>
-                        <SelectItem value="commercial">Commercial</SelectItem>
-                        <SelectItem value="office">Office</SelectItem>
+                        {parkingOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              <Car className="h-4 w-4" />
+                              {option.label}
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="forSaleOrRent"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>For Sale</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select listing type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="sale">Sale</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (₹)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="2500000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="mt-4 bg-red-50 border border-red-100 rounded-lg p-4">
-              <FormField
-                control={form.control}
-                name="isUrgentSale"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-red-200 p-4 bg-white">
-                    <FormControl>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(checked) => {
-                            // Check if the user has a premium subscription
-                            if (
-                              checked &&
-                              (!user || user.subscriptionLevel !== "premium")
-                            ) {
-                              // Show premium upgrade modal
-                              setShowPremiumModal(true);
-                              return;
-                            }
-                            field.onChange(checked);
-                          }}
-                          id="urgent-sale"
-                        />
-                        <label
-                          htmlFor="urgent-sale"
-                          className="text-sm font-medium leading-none cursor-pointer flex items-center"
-                        >
-                          <Clock className="h-4 w-4 text-red-600 mr-1" />
-                          <span className="text-red-600 font-semibold">
-                            List as Urgency Sale (25% discount)
-                          </span>
-                          {!user || user.subscriptionLevel !== "premium" ? (
-                            <span className="ml-2 bg-amber-100 text-amber-800 text-xs py-0.5 px-2 rounded-full">
-                              Premium Only
-                            </span>
-                          ) : null}
-                        </label>
-                      </div>
-                    </FormControl>
-                    <div className="text-sm text-gray-600 mt-2">
-                      Listing as an urgency sale will apply a 25% discount to
-                      your property price. Your property will be featured in the
-                      Urgency Sales section for 7 days, attracting serious
-                      buyers looking for time-limited deals.
-                      {!user || user.subscriptionLevel !== "premium" ? (
-                        <div className="mt-2 text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
-                          This feature is exclusive to premium members.{" "}
-                          <a
-                            href="/subscription"
-                            className="text-primary underline"
-                          >
-                            Upgrade your account
-                          </a>{" "}
-                          to access urgency sales.
-                        </div>
-                      ) : null}
-                    </div>
                   </FormItem>
                 )}
               />
@@ -855,14 +1820,205 @@ export default function PostPropertyFree() {
 
             <FormField
               control={form.control}
-              name="description"
+              name="facing"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property Description</FormLabel>
+                  <FormLabel className="text-gray-700">
+                    Facing Direction
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select facing direction" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {facingOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            <Compass className="h-4 w-4" />
+                            {option.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Enhanced Amenities section with checkboxes */}
+            <div className="space-y-4">
+              <FormLabel className="text-gray-700">Amenities</FormLabel>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {amenitiesOptions.map((amenity) => (
+                  <FormField
+                    key={amenity.value}
+                    control={form.control}
+                    name="amenities"
+                    render={({ field }) => {
+                      return (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(amenity.value)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([
+                                      ...(field.value || []),
+                                      amenity.value,
+                                    ])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== amenity.value,
+                                      ) ?? [],
+                                    );
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal flex items-center gap-2">
+                            {amenity.icon || <Square className="h-4 w-4" />}
+                            {amenity.label}
+                          </FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+              </div>
+              <FormMessage />
+            </div>
+
+            {/* Brokerage section for agents */}
+            {userType === "agent" && (
+              <div className="space-y-4">
+                <FormLabel className="text-gray-700">
+                  Brokerage (Brokers only)
+                </FormLabel>
+                <RadioGroup
+                  defaultValue="0"
+                  className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                  onValueChange={(value) => form.setValue("brokerage", value)}
+                >
+                  {brokerageOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className="flex items-center space-x-2"
+                    >
+                      <RadioGroupItem
+                        value={option.value}
+                        id={`brokerage-${option.value}`}
+                      />
+                      <label
+                        htmlFor={`brokerage-${option.value}`}
+                        className="text-sm font-medium leading-none"
+                      >
+                        {option.label}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
+                <FormField
+                  control={form.control}
+                  name="noBrokerResponses"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-gray-50">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="font-normal">
+                          I am not interested in getting responses from brokers
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {user?.subscriptionLevel === "premium" && (
+              <FormField
+                control={form.control}
+                name="isUrgentSale"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-blue-50">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="mt-1"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="font-semibold text-blue-800 flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-blue-600" />
+                        Urgency Sale
+                      </FormLabel>
+                      <FormDescription className="text-blue-700">
+                        List with a 25% discount to attract quick buyers. Your
+                        property will be highlighted in search results.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <div className="flex justify-end pt-4">
+              <Button
+                type="button"
+                size="lg"
+                onClick={() => {
+                  form
+                    .trigger([
+                      "userType",
+                      "propertyCategory",
+                      "propertyType",
+                      "transactionType",
+                      "title",
+                      "area",
+                      "pricePerUnit",
+                      "totalPrice",
+                    ])
+                    .then((isValid) => {
+                      if (isValid) {
+                        setCurrentStep(2);
+                        formTopRef.current?.scrollIntoView({
+                          behavior: "smooth",
+                        });
+                      }
+                    });
+                }}
+              >
+                Next: Location
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Location Details
+            </h2>
+
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">City*</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Describe your property in detail..."
-                      className="h-24"
+                    <Input
+                      placeholder="Enter city name"
+                      className="h-12"
                       {...field}
                     />
                   </FormControl>
@@ -871,94 +2027,253 @@ export default function PostPropertyFree() {
               )}
             />
 
-            <div className="flex justify-end mt-6">
-              <Button
-                type="button"
-                onClick={() => setCurrentStep(2)}
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                Next: Location Details
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        );
+            {userType === "builder" && (
+              <FormField
+                control={form.control}
+                name="projectName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">
+                      Project Name*
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Name of your project"
+                        className="h-12"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the name of your housing project or development
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
-      case 2:
-        return (
-          <div className="space-y-4">
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">
-                Location Information
-              </h3>
-              <Separator />
-            </div>
+            {userType !== "builder" && (
+              <FormField
+                control={form.control}
+                name="projectName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">
+                      Name of Project/Society
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Name of Project/Society"
+                        className="h-12"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the name of your housing project, society, or
+                      community
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Full Address*</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Textarea
+                        placeholder={
+                          userType === "builder"
+                            ? "Project address, street, landmark..."
+                            : "Building name, street, landmark..."
+                        }
+                        rows={3}
+                        className="min-h-[100px] flex-1"
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-[100px]"
+                      onClick={detectLocation}
+                      disabled={isDetectingLocation}
+                    >
+                      {isDetectingLocation ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Navigation className="h-4 w-4" />
+                      )}
+                      <span className="ml-2">Detect</span>
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="landmarks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">
+                    Nearby Landmarks
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. Near Metro Station, Opposite Mall, etc."
+                      className="h-12"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Help buyers locate your property easily
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="pincode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Pincode*</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. 500032"
+                      className="h-12"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {userType === "builder" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="location"
+                  name="projectStatus"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <div className="flex">
+                      <FormLabel className="text-gray-700">
+                        Project Status
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
-                          <Input
-                            placeholder="123 Main Street, Area Name"
-                            {...field}
-                            className="rounded-r-none"
-                          />
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Select project status" />
+                          </SelectTrigger>
                         </FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="rounded-l-none border-l-0"
-                          onClick={getUserLocation}
-                        >
-                          <MapPin className="h-4 w-4 text-primary" />
-                        </Button>
-                      </div>
-                      <FormDescription>
-                        Click the location icon to use your current location
-                      </FormDescription>
+                        <SelectContent>
+                          {projectStatusOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="reraRegistered"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        RERA Registered
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12">
+                            <SelectValue placeholder="Is project RERA registered?" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="yes">Yes</SelectItem>
+                          <SelectItem value="no">No</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+            )}
 
-              <FormField
-                control={form.control}
-                name="pincode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pincode</FormLabel>
-                    <FormControl>
-                      <Input placeholder="400001" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {userType === "builder" &&
+              form.watch("reraRegistered") === "yes" && (
+                <FormField
+                  control={form.control}
+                  name="reraNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        RERA Number
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter RERA registration number"
+                          className="h-12"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setCurrentStep(1)}
+                size="lg"
+                onClick={() => {
+                  setCurrentStep(1);
+                  formTopRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
               >
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
               <Button
                 type="button"
-                onClick={() => setCurrentStep(3)}
-                className="bg-primary hover:bg-primary/90 text-white"
+                size="lg"
+                onClick={() => {
+                  form
+                    .trigger(["city", "location", "pincode"])
+                    .then((isValid) => {
+                      if (isValid) {
+                        setCurrentStep(3);
+                        formTopRef.current?.scrollIntoView({
+                          behavior: "smooth",
+                        });
+                      }
+                    });
+                }}
               >
-                Next: Property Details
-                <ChevronRight className="ml-2 h-4 w-4" />
+                Next: Photos
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -966,134 +2281,410 @@ export default function PostPropertyFree() {
 
       case 3:
         return (
-          <div className="space-y-4">
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">Property Details</h3>
-              <Separator />
-            </div>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Property Media</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="bedrooms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bedrooms</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(value)}
-                      defaultValue={field.value?.toString() || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="">Select</SelectItem>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                        <SelectItem value="3">3</SelectItem>
-                        <SelectItem value="4">4</SelectItem>
-                        <SelectItem value="5">5</SelectItem>
-                        <SelectItem value="6">5+</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="bg-white p-4 rounded-lg shadow-sm border">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">
+                  85% of Buyers enquire on Properties with Photos
+                </h3>
+                <p className="text-gray-600">
+                  Upload Photos & Get upto 10X more Enquiries
+                </p>
+              </div>
 
-              <FormField
-                control={form.control}
-                name="bathrooms"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bathrooms</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(value)}
-                      defaultValue={field.value?.toString() || ""}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="">Select</SelectItem>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                        <SelectItem value="3">3</SelectItem>
-                        <SelectItem value="4">4</SelectItem>
-                        <SelectItem value="5">5</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="md:col-span-1">
-                <div className="grid grid-cols-2 gap-2">
-                  <FormField
-                    control={form.control}
-                    name="area"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Area</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="1200" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="areaUnit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unit</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
+              <Tabs
+                value={activeImageTab}
+                onValueChange={setActiveImageTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 h-auto p-2 bg-gray-100">
+                  <TabsTrigger value="exterior" className="py-2 text-xs h-auto">
+                    <div className="flex flex-col items-center gap-1">
+                      <Square className="h-4 w-4" />
+                      <span>Exterior View</span>
+                    </div>
+                  </TabsTrigger>
+                  {propertyCategory === "residential" &&
+                    !["residential-land", "studio-apartment"].includes(
+                      propertyType,
+                    ) && (
+                      <>
+                        <TabsTrigger
+                          value="livingRoom"
+                          className="py-2 text-xs h-auto"
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Unit" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="sqft">sq.ft</SelectItem>
-                            <SelectItem value="sqm">sq.m</SelectItem>
-                            <SelectItem value="acres">Acres</SelectItem>
-                            <SelectItem value="hectares">Hectares</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
+                          <div className="flex flex-col items-center gap-1">
+                            <Home className="h-4 w-4" />
+                            <span>Living Room</span>
+                          </div>
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="bedrooms"
+                          className="py-2 text-xs h-auto"
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <BedDouble className="h-4 w-4" />
+                            <span>Bedrooms</span>
+                          </div>
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="bathrooms"
+                          className="py-2 text-xs h-auto"
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <Bath className="h-4 w-4" />
+                            <span>Bathrooms</span>
+                          </div>
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="kitchen"
+                          className="py-2 text-xs h-auto"
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <Layout className="h-4 w-4" />
+                            <span>Kitchen</span>
+                          </div>
+                        </TabsTrigger>
+                      </>
                     )}
-                  />
+                  <TabsTrigger
+                    value="floorPlan"
+                    className="py-2 text-xs h-auto"
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <Ruler className="h-4 w-4" />
+                      <span>Floor Plan</span>
+                    </div>
+                  </TabsTrigger>
+                  {(propertyType === "residential-land" ||
+                    propertyType === "commercial-land" ||
+                    propertyType === "agricultural-land") && (
+                    <TabsTrigger
+                      value="masterPlan"
+                      className="py-2 text-xs h-auto"
+                    >
+                      <div className="flex flex-col items-center gap-1">
+                        <Map className="h-4 w-4" />
+                        <span>Master Plan</span>
+                      </div>
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger
+                    value="locationMap"
+                    className="py-2 text-xs h-auto"
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      <span>Location Map</span>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="other" className="py-2 text-xs h-auto">
+                    <div className="flex flex-col items-center gap-1">
+                      <Square className="h-4 w-4" />
+                      <span>Others</span>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="videos" className="py-2 text-xs h-auto">
+                    <div className="flex flex-col items-center gap-1">
+                      <Video className="h-4 w-4" />
+                      <span>Videos</span>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="mt-6">
+                  <TabsContent value="exterior">
+                    <div>
+                      <FormDescription className="mb-4">
+                        Upload photos of the property exterior, facade, or front
+                        view (Max 5 images)
+                      </FormDescription>
+                      <FileUpload
+                        maxFiles={5}
+                        maxSize={20 * 1024 * 1024}
+                        accepts={["image/*"]}
+                        onFilesSelected={(files) => setExteriorImages(files)}
+                        onFileRemoved={(fileId) =>
+                          setExteriorImages((prev) =>
+                            prev.filter((file) => file.id !== fileId),
+                          )
+                        }
+                        files={exteriorImages}
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {propertyCategory === "residential" &&
+                    !["residential-land", "studio-apartment"].includes(
+                      propertyType,
+                    ) && (
+                      <>
+                        <TabsContent value="livingRoom">
+                          <div>
+                            <FormDescription className="mb-4">
+                              Upload photos of the living room and common areas
+                              (Max 5 images)
+                            </FormDescription>
+                            <FileUpload
+                              maxFiles={5}
+                              maxSize={20 * 1024 * 1024}
+                              accepts={["image/*"]}
+                              onFilesSelected={(files) =>
+                                setLivingRoomImages(files)
+                              }
+                              onFileRemoved={(fileId) =>
+                                setLivingRoomImages((prev) =>
+                                  prev.filter((file) => file.id !== fileId),
+                                )
+                              }
+                              files={livingRoomImages}
+                            />
+                          </div>
+                        </TabsContent>
+
+                        <TabsContent value="bedrooms">
+                          <div>
+                            <FormDescription className="mb-4">
+                              Upload photos of each bedroom (Max 5 images per
+                              bedroom)
+                            </FormDescription>
+                            <FileUpload
+                              maxFiles={
+                                5 * parseInt(form.watch("bedrooms") || "1")
+                              }
+                              maxSize={20 * 1024 * 1024}
+                              accepts={["image/*"]}
+                              onFilesSelected={(files) =>
+                                setBedroomImages(files)
+                              }
+                              onFileRemoved={(fileId) =>
+                                setBedroomImages((prev) =>
+                                  prev.filter((file) => file.id !== fileId),
+                                )
+                              }
+                              files={bedroomImages}
+                            />
+                          </div>
+                        </TabsContent>
+
+                        <TabsContent value="bathrooms">
+                          <div>
+                            <FormDescription className="mb-4">
+                              Upload photos of each bathroom (Max 3 images per
+                              bathroom)
+                            </FormDescription>
+                            <FileUpload
+                              maxFiles={
+                                3 * parseInt(form.watch("bathrooms") || "1")
+                              }
+                              maxSize={20 * 1024 * 1024}
+                              accepts={["image/*"]}
+                              onFilesSelected={(files) =>
+                                setBathroomImages(files)
+                              }
+                              onFileRemoved={(fileId) =>
+                                setBathroomImages((prev) =>
+                                  prev.filter((file) => file.id !== fileId),
+                                )
+                              }
+                              files={bathroomImages}
+                            />
+                          </div>
+                        </TabsContent>
+
+                        <TabsContent value="kitchen">
+                          <div>
+                            <FormDescription className="mb-4">
+                              Upload photos of the kitchen area (Max 5 images)
+                            </FormDescription>
+                            <FileUpload
+                              maxFiles={5}
+                              maxSize={20 * 1024 * 1024}
+                              accepts={["image/*"]}
+                              onFilesSelected={(files) =>
+                                setKitchenImages(files)
+                              }
+                              onFileRemoved={(fileId) =>
+                                setKitchenImages((prev) =>
+                                  prev.filter((file) => file.id !== fileId),
+                                )
+                              }
+                              files={kitchenImages}
+                            />
+                          </div>
+                        </TabsContent>
+                      </>
+                    )}
+
+                  <TabsContent value="floorPlan">
+                    <div>
+                      <FormDescription className="mb-4">
+                        Upload floor plans or layout diagrams (Max 3 images)
+                      </FormDescription>
+                      <FileUpload
+                        maxFiles={3}
+                        maxSize={20 * 1024 * 1024}
+                        accepts={["image/*"]}
+                        onFilesSelected={(files) => setFloorPlanImages(files)}
+                        onFileRemoved={(fileId) =>
+                          setFloorPlanImages((prev) =>
+                            prev.filter((file) => file.id !== fileId),
+                          )
+                        }
+                        files={floorPlanImages}
+                      />
+                    </div>
+                  </TabsContent>
+
+                  {(propertyType === "residential-land" ||
+                    propertyType === "commercial-land" ||
+                    propertyType === "agricultural-land") && (
+                    <TabsContent value="masterPlan">
+                      <div>
+                        <FormDescription className="mb-4">
+                          Upload master plan or site layout if available (Max 3
+                          images)
+                        </FormDescription>
+                        <FileUpload
+                          maxFiles={3}
+                          maxSize={20 * 1024 * 1024}
+                          accepts={["image/*"]}
+                          onFilesSelected={(files) =>
+                            setMasterPlanImages(files)
+                          }
+                          onFileRemoved={(fileId) =>
+                            setMasterPlanImages((prev) =>
+                              prev.filter((file) => file.id !== fileId),
+                            )
+                          }
+                          files={masterPlanImages}
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  <TabsContent value="locationMap">
+                    <div>
+                      <FormDescription className="mb-4">
+                        Upload location maps or nearby landmarks (Max 2 images)
+                      </FormDescription>
+                      <FileUpload
+                        maxFiles={2}
+                        maxSize={20 * 1024 * 1024}
+                        accepts={["image/*"]}
+                        onFilesSelected={(files) => setLocationMapImages(files)}
+                        onFileRemoved={(fileId) =>
+                          setLocationMapImages((prev) =>
+                            prev.filter((file) => file.id !== fileId),
+                          )
+                        }
+                        files={locationMapImages}
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="other">
+                    <div>
+                      <FormDescription className="mb-4">
+                        Upload any other relevant photos (Max 10 images)
+                      </FormDescription>
+                      <FileUpload
+                        maxFiles={10}
+                        maxSize={20 * 1024 * 1024}
+                        accepts={["image/*"]}
+                        onFilesSelected={(files) => setOtherImages(files)}
+                        onFileRemoved={(fileId) =>
+                          setOtherImages((prev) =>
+                            prev.filter((file) => file.id !== fileId),
+                          )
+                        }
+                        files={otherImages}
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="videos">
+                    <div>
+                      <FormDescription className="mb-4">
+                        Upload property walkthrough videos (max 30MB each, Max 2
+                        videos)
+                      </FormDescription>
+                      <FileUpload
+                        maxFiles={2}
+                        maxSize={30 * 1024 * 1024}
+                        accepts={["video/*"]}
+                        onFilesSelected={(files) => setVideoFiles(files)}
+                        onFileRemoved={(fileId) =>
+                          setVideoFiles((prev) =>
+                            prev.filter((file) => file.id !== fileId),
+                          )
+                        }
+                        files={videoFiles}
+                      />
+                    </div>
+                  </TabsContent>
                 </div>
+              </Tabs>
+
+              <div className="mt-6 text-xs text-gray-500">
+                <p>Accepted formats are .jpg, .gif, .bmp & .png.</p>
+                <p>
+                  Maximum size allowed is 20 MB. Minimum dimension allowed
+                  800*400 Pixel
+                </p>
+                <p className="mt-2">
+                  You can also email them to us for uploading at
+                  photos@magicbricks.com
+                </p>
               </div>
             </div>
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setCurrentStep(2)}
+                size="lg"
+                onClick={() => {
+                  setCurrentStep(2);
+                  formTopRef.current?.scrollIntoView({ behavior: "smooth" });
+                }}
               >
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
               <Button
                 type="button"
-                onClick={() => setCurrentStep(4)}
-                className="bg-primary hover:bg-primary/90 text-white"
+                size="lg"
+                onClick={() => {
+                  const totalImages = [
+                    ...exteriorImages,
+                    ...livingRoomImages,
+                    ...bedroomImages,
+                    ...bathroomImages,
+                    ...kitchenImages,
+                    ...floorPlanImages,
+                    ...masterPlanImages,
+                    ...locationMapImages,
+                    ...otherImages,
+                  ].length;
+
+                  if (totalImages >= 1) {
+                    setCurrentStep(4);
+                    formTopRef.current?.scrollIntoView({ behavior: "smooth" });
+                  } else {
+                    toast({
+                      title: "Photos Required",
+                      description:
+                        "Please upload at least one photo of your property",
+                      variant: "destructive",
+                    });
+                  }
+                }}
               >
-                Next: Upload Images
-                <ChevronRight className="ml-2 h-4 w-4" />
+                Next: Contact Info
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -1101,66 +2692,52 @@ export default function PostPropertyFree() {
 
       case 4:
         return (
-          <div className="space-y-4">
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">Property Images</h3>
-              <Separator />
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Contact Information
+            </h2>
+
+            <div className="bg-blue-50 p-6 rounded-lg mb-6">
+              <div className="flex flex-col md:flex-row gap-6 items-center">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md">
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={user.name || "Profile"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-blue-100 text-blue-600">
+                      <User className="w-12 h-12" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold">
+                    {user?.name || "Your Profile"}
+                  </h3>
+                  <p className="text-gray-600 mb-2">{user?.email}</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Complete your profile information below to help buyers
+                    contact you
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <FileUpload
-                onFilesSelected={handleFilesSelected}
-                onFileRemoved={handleFileRemoved}
-                initialFiles={propertyImages}
-                maxFiles={8}
-                allowMultiple={true}
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Upload up to 8 high-quality images of your property. The first
-                image will be used as the main display image.
-              </p>
-            </div>
-
-            <div className="flex justify-between mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCurrentStep(3)}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setCurrentStep(5)}
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                Next: Contact Details
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        );
-
-      case 5:
-        return (
-          <div className="space-y-4">
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">
-                Contact Information
-              </h3>
-              <Separator />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="contactName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contact Name</FormLabel>
+                    <FormLabel className="text-gray-700">Your Name*</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name" {...field} />
+                      <Input
+                        placeholder="Full name"
+                        className="h-12"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1172,9 +2749,15 @@ export default function PostPropertyFree() {
                 name="contactPhone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contact Phone</FormLabel>
+                    <FormLabel className="text-gray-700">
+                      Phone Number*
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="Your phone number" {...field} />
+                      <Input
+                        placeholder="10-digit mobile number"
+                        className="h-12"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1182,248 +2765,53 @@ export default function PostPropertyFree() {
               />
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg mt-6">
-              <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  <BadgeCheck className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-blue-800">Privacy Notice</h4>
-                  <p className="text-sm text-blue-700 mt-1">
-                    Your contact information will only be shared with interested
-                    buyers. We prioritize your privacy and security.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <FormField
+              control={form.control}
+              name="whatsappEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-green-50">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="font-semibold text-green-800 flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-green-600" />
+                      Enable WhatsApp Contact
+                    </FormLabel>
+                    <FormDescription className="text-green-700">
+                      Allow buyers to contact you directly via WhatsApp for
+                      faster communication
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
 
-            <div className="flex justify-between mt-6">
+            <div className="flex justify-between pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setCurrentStep(4)}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-              <Button
-                type="button"
-                onClick={() => setCurrentStep(6)}
-                className="bg-primary hover:bg-primary/90 text-white"
-              >
-                Next: Review & Submit
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        );
-
-      case 6:
-        return (
-          <div className="space-y-4">
-            <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-3">
-                Review Your Property Listing
-              </h3>
-              <Separator />
-            </div>
-
-            <div className="bg-gray-50 p-5 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Property Title
-                  </h4>
-                  <p className="text-base">{form.getValues().title || "N/A"}</p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Property Type
-                  </h4>
-                  <p className="text-base capitalize">
-                    {form.getValues().propertyType || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    For Sale/Rent
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().forSaleOrRent || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Price</h4>
-                  {form.getValues().isUrgentSale ? (
-                    <div>
-                      <p className="text-base flex items-center">
-                        <span className="line-through text-gray-500 mr-2">
-                          ₹{(form.getValues().price || 0).toLocaleString()}
-                        </span>
-                        <span className="text-red-600 font-semibold">
-                          ₹
-                          {Math.round(
-                            (form.getValues().price || 0) * 0.75,
-                          ).toLocaleString()}
-                        </span>
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          <Clock className="h-3 w-3 mr-1" />
-                          Urgency Sale
-                        </span>
-                      </p>
-                      <p className="text-xs text-red-600 mt-1">
-                        25% discount applied! Limited time offer (7 days)
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-base">
-                      ₹{(form.getValues().price || 0).toLocaleString()}
-                    </p>
-                  )}
-                </div>
-
-                <div className="md:col-span-2">
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Description
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().description || "N/A"}
-                  </p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Location
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().location || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Pincode</h4>
-                  <p className="text-base">
-                    {form.getValues().pincode || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Area</h4>
-                  <p className="text-base">
-                    {form.getValues().area} {form.getValues().areaUnit}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Bedrooms
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().bedrooms || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Bathrooms
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().bathrooms || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Contact Name
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().contactName || "N/A"}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Contact Phone
-                  </h4>
-                  <p className="text-base">
-                    {form.getValues().contactPhone || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">
-                  Property Images
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {propertyImages.length > 0 ? (
-                    propertyImages.map((image) => (
-                      <div
-                        key={image.id}
-                        className="relative aspect-video overflow-hidden rounded-md bg-gray-200"
-                      >
-                        <img
-                          src={image.preview}
-                          alt="Property"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-4 text-center py-8 border border-dashed border-gray-300 rounded-md">
-                      <p className="text-gray-500">No images uploaded</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-6 bg-yellow-50 p-3 rounded-md">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <Clock className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-yellow-800">
-                      Approval Process
-                    </h4>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Your property listing will be reviewed by our team and
-                      typically approved within 24 hours.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-between mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCurrentStep(5)}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
-              <Button
-                type="button"
+                size="lg"
                 onClick={() => {
-                  console.log("Submit button clicked", form.getValues());
-                  form.handleSubmit(onSubmit)();
+                  setCurrentStep(3);
+                  formTopRef.current?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="bg-primary hover:bg-primary/90 text-white"
-                disabled={formSubmitted || createPropertyMutation.isPending}
               >
-                {formSubmitted || createPropertyMutation.isPending ? (
-                  <>
-                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    Submitting...
-                  </>
-                ) : (
-                  <>List My Property</>
-                )}
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Previous
+              </Button>
+              <Button
+                type="submit"
+                size="lg"
+                className="bg-green-600 hover:bg-green-700"
+                disabled={isLoading}
+              >
+                {isLoading ? "Submitting..." : "Submit Property"}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -1435,862 +2823,96 @@ export default function PostPropertyFree() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="flex-grow bg-gray-50">
-        {/* Hero section */}
-        <section className="bg-gradient-to-b from-primary/90 to-primary text-white pt-12 pb-10 md:pt-20 md:pb-16">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                List Your Property for Free
-              </h1>
-              <p className="text-lg opacity-90 mb-6">
-                Connect directly with millions of potential buyers and tenants
-                across India
-              </p>
-              <div className="flex flex-wrap justify-center gap-4 mt-8">
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full py-3 px-5">
-                  <Check className="h-5 w-5 text-green-300 mr-2" />
-                  <span className="text-sm">No broker fees</span>
-                </div>
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full py-3 px-5">
-                  <Check className="h-5 w-5 text-green-300 mr-2" />
-                  <span className="text-sm">Free listing</span>
-                </div>
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full py-3 px-5">
-                  <Check className="h-5 w-5 text-green-300 mr-2" />
-                  <span className="text-sm">Verified buyers</span>
-                </div>
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full py-3 px-5">
-                  <Check className="h-5 w-5 text-green-300 mr-2" />
-                  <span className="text-sm">Simple process</span>
+
+      <div className="container mx-auto py-8 px-4 md:px-6">
+        <div className="max-w-4xl" ref={formTopRef}>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              List Your Property for Sale
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Connect directly with buyers - No brokerage fees!
+            </p>
+          </div>
+
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">New Property Listing</h2>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4].map((step) => (
+                    <div
+                      key={step}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        step < currentStep
+                          ? "bg-white text-blue-600"
+                          : step === currentStep
+                            ? "bg-blue-400 text-white"
+                            : "bg-blue-700 text-blue-200"
+                      }`}
+                    >
+                      {step < currentStep ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <span>{step}</span>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Process steps */}
-        <section className="py-12 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                List Your Property
-              </h1>
-              <p className="text-gray-600">
-                Fill in the details below to list your property directly to
-                potential buyers without broker fees.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Property Details</CardTitle>
-                    <CardDescription>
-                      Provide accurate information to attract serious buyers
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...form}>
-                      <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-6"
-                      >
-                        <div className="space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="title"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Property Title</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Luxury 3BHK Apartment in Whitefield"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  A clear title helps buyers find your property
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="propertyType"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Property Type</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select property type" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {[
-                                        "apartment",
-                                        "villa",
-                                        "house",
-                                        "plot",
-                                        "commercial",
-                                        "office",
-                                      ].map((type) => (
-                                        <SelectItem key={type} value={type}>
-                                          {type.charAt(0).toUpperCase() +
-                                            type.slice(1)}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name="price"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Price (₹)</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="e.g. 7500000"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          e.target.value === ""
-                                            ? undefined
-                                            : parseInt(e.target.value),
-                                        )
-                                      }
-                                    />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Enter the price in rupees (without commas)
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Description</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="Describe your property, include important features, amenities, and why it's a good investment"
-                                    className="min-h-[120px]"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <Separator className="my-6" />
-                          <h3 className="text-lg font-semibold mb-4">
-                            Location Information
-                          </h3>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="city"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>City</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="e.g. Bangalore"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name="location"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Area/Locality</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="e.g. Whitefield"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={form.control}
-                            name="address"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Full Address</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="Enter the complete address of the property"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <Separator className="my-6" />
-                          <h3 className="text-lg font-semibold mb-4">
-                            Property Specifications
-                          </h3>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="bedrooms"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Bedrooms</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="e.g. 3"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          e.target.value === ""
-                                            ? undefined
-                                            : parseInt(e.target.value),
-                                        )
-                                      }
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name="bathrooms"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Bathrooms</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="e.g. 2"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          e.target.value === ""
-                                            ? undefined
-                                            : parseInt(e.target.value),
-                                        )
-                                      }
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name="area"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Area (sq.ft)</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="e.g. 1200"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          e.target.value === ""
-                                            ? undefined
-                                            : parseInt(e.target.value),
-                                        )
-                                      }
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <Separator className="my-6" />
-                          <h3 className="text-lg font-semibold mb-4">
-                            Property Images
-                          </h3>
-
-                          <div className="space-y-4">
-                            <FormField
-                              control={form.control}
-                              name="imageUrlsInput"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Image URLs</FormLabel>
-                                  <FormControl>
-                                    <Textarea
-                                      placeholder="Enter image URLs separated by commas"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Add URLs to your property images, separated
-                                    by commas
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                              <div className="flex items-start">
-                                <Upload className="h-5 w-5 mr-2 text-gray-500 mt-0.5" />
-                                <div>
-                                  <h4 className="font-medium text-gray-900">
-                                    Upload Images & Videos
-                                  </h4>
-                                  <p className="text-sm text-gray-600 mb-3">
-                                    Upload photos and videos of your property
-                                    directly. Max file size: 20MB.
-                                  </p>
-                                  <FileUpload
-                                    onFilesSelected={setPropertyImages}
-                                    initialFiles={propertyImages}
-                                    maxFiles={25}
-                                    allowMultiple={true}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            type="submit"
-                            className="w-full bg-primary hover:bg-primary/90"
-                            disabled={
-                              formSubmitted || createPropertyMutation.isPending
-                            }
-                          >
-                            {formSubmitted ||
-                            createPropertyMutation.isPending ? (
-                              <>
-                                <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                                Submitting...
-                              </>
-                            ) : (
-                              "List My Property"
-                            )}
-                          </Button>
-                        </div>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="py-12 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                How It Works
-              </h2>
-              <p className="text-gray-600">
-                Listing your property is easy and free. Follow these simple
-                steps to get started.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-              {howItWorksSteps.map((step) => (
-                <div
-                  key={step.id}
-                  className="bg-white rounded-lg p-6 border border-gray-100 hover:shadow-md transition-shadow"
+            <CardContent className="p-6">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
                 >
-                  <div className="bg-primary/10 p-4 rounded-full inline-flex mb-4">
-                    {step.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                  {renderFormStep()}
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
 
-        {/* Testimonials */}
-        <section className="py-12 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                What Property Owners Say
-              </h2>
-              <p className="text-gray-600">
-                Join thousands of satisfied property owners who have
-                successfully listed and sold their properties through our
-                platform
-              </p>
-            </div>
+          {/* OTP Verification Modal */}
+          <Dialog open={showOtpModal} onOpenChange={setShowOtpModal}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-blue-500" />
+                  WhatsApp OTP Verification
+                </DialogTitle>
+                <DialogDescription>
+                  We've sent a 6-digit OTP to {form.watch("contactPhone")}
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="max-w-4xl mx-auto">
-              <div className="relative bg-white rounded-xl shadow-lg p-6 md:p-10">
-                <div className="flex justify-end space-x-2 absolute right-4 top-4">
+              <div className="space-y-4 py-4">
+                <OtpInput
+                  length={6}
+                  onOtpSubmit={handleOtpSubmit}
+                  disabled={isLoading}
+                />
+                <div className="text-center text-sm text-gray-500">
+                  Didn't receive OTP?{" "}
                   <button
-                    onClick={prevTestimonial}
-                    className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
+                    type="button"
+                    className="text-blue-600 hover:underline"
+                    onClick={() => sendOtp(form.watch("contactPhone"))}
+                    disabled={isSendingOtp}
                   >
-                    <ChevronLeft className="h-4 w-4 text-gray-600" />
-                  </button>
-                  <button
-                    onClick={nextTestimonial}
-                    className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
-                  >
-                    <ChevronRight className="h-4 w-4 text-gray-600" />
+                    {isSendingOtp ? "Sending..." : "Resend OTP"}
                   </button>
                 </div>
-
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-primary/20">
-                      <img
-                        src={testimonials[currentTestimonialIndex].avatar}
-                        alt={testimonials[currentTestimonialIndex].name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4">
-                      <h3 className="text-lg font-semibold">
-                        {testimonials[currentTestimonialIndex].name}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span>
-                          {testimonials[currentTestimonialIndex].role}
-                        </span>
-                        <span>•</span>
-                        <span>
-                          {testimonials[currentTestimonialIndex].location}
-                        </span>
-                      </div>
-                    </div>
-                    <blockquote className="text-gray-700 italic relative">
-                      <div className="absolute -left-4 -top-2 text-primary/10 text-4xl">
-                        "
-                      </div>
-                      <p className="relative z-10">
-                        {testimonials[currentTestimonialIndex].content}
-                      </p>
-                    </blockquote>
-                  </div>
-                </div>
               </div>
-            </div>
-          </div>
-        </section>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
-        {/* FAQ section */}
-        <section className="py-12 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                Frequently Asked Questions
-              </h2>
-              <p className="text-gray-600">
-                Get answers to common questions about listing your property
-              </p>
-            </div>
-
-            <div className="max-w-3xl mx-auto">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="item-1">
-                  <AccordionTrigger className="text-left">
-                    Is it really free to list my property?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Yes, basic property listings are completely free. We believe
-                    in connecting property owners directly with buyers without
-                    any intermediary costs. Premium listing options are
-                    available for enhanced visibility.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-2">
-                  <AccordionTrigger className="text-left">
-                    How long does it take for my property to get approved?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Most property listings are approved within 24 hours. Our
-                    verification team reviews all listings to ensure quality and
-                    legitimacy before they go live on the platform.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-3">
-                  <AccordionTrigger className="text-left">
-                    Who can see my contact information?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Only registered and verified users who express interest in
-                    your property can see your contact details. We protect your
-                    privacy and only share information with serious potential
-                    buyers.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-4">
-                  <AccordionTrigger className="text-left">
-                    Can I edit my property listing after submitting?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Yes, you can edit your property listing at any time through
-                    your dashboard. Changes to critical information may require
-                    re-approval by our verification team.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-5">
-                  <AccordionTrigger className="text-left">
-                    What are the benefits of premium listings?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    Premium listings receive featured placement on the homepage
-                    and search results, professional photo editing, virtual
-                    tours, and detailed analytics on viewer engagement with your
-                    property.
-                  </AccordionContent>
-                </AccordionItem>
-
-                <AccordionItem value="item-6">
-                  <AccordionTrigger className="text-left">
-                    How do I communicate with potential buyers?
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    When a buyer expresses interest, you'll receive a
-                    notification with their contact details. You can then
-                    communicate directly via phone, email, or our built-in
-                    messaging system.
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-          </div>
-        </section>
-
-        {/* Login modal */}
-        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Login Required</DialogTitle>
-              <DialogDescription>
-                You need to be logged in to post a property. Please login or
-                create an account to continue.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <p className="text-sm text-gray-600 mb-4">
-                Logging in helps us verify your identity and secure your
-                property listing.
-              </p>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowLoginModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-primary hover:bg-primary/90 text-white"
-                onClick={handleLoginClick}
-              >
-                Go to Login
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Property Listing Roadmap */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-4">
-                Your Property Listing Journey
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Follow these simple steps to get your property in front of
-                millions of potential buyers and tenants
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="bg-white rounded-xl p-6 shadow-md relative">
-                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-lg font-bold mb-4">
-                  1
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Add Your Details</h3>
-                <p className="text-gray-600">
-                  Fill out the basic information about your property including
-                  location, size, and amenities.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-md relative">
-                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-lg font-bold mb-4">
-                  2
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Upload Photos</h3>
-                <p className="text-gray-600">
-                  Add high-quality photos of your property to attract more
-                  potential buyers or tenants.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 shadow-md relative">
-                <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center text-lg font-bold mb-4">
-                  3
-                </div>
-                <h3 className="text-xl font-semibold mb-3">Get Connected</h3>
-                <p className="text-gray-600">
-                  Start receiving inquiries from verified buyers and schedule
-                  property visits.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-4">Success Stories</h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Join thousands of satisfied property owners who successfully
-                listed their properties
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <div className="bg-gray-50 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-primary font-bold">RK</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Rajesh Kumar</h4>
-                    <p className="text-sm text-gray-500">Delhi</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "I received 15 inquiries within the first week of listing my
-                  apartment. The process was simple and effective!"
-                </p>
-                <div className="flex items-center mt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5 text-yellow-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-primary font-bold">SP</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Sunita Patel</h4>
-                    <p className="text-sm text-gray-500">Mumbai</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "Sold my property in just 3 weeks! The platform connected me
-                  with serious buyers who were genuinely interested."
-                </p>
-                <div className="flex items-center mt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5 text-yellow-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-primary font-bold">AJ</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Arun Joshi</h4>
-                    <p className="text-sm text-gray-500">Bangalore</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "As a first-time seller, I found the process extremely
-                  user-friendly. The customer support team was very helpful
-                  throughout."
-                </p>
-                <div className="flex items-center mt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="w-5 h-5 text-yellow-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
       <Footer />
-
-      {/* Premium Feature Modal */}
-      <Dialog open={showPremiumModal} onOpenChange={setShowPremiumModal}>
-        <DialogContent className="max-w-md sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Star className="mr-2 h-5 w-5 text-yellow-500" />
-              <span>Premium Feature Access</span>
-            </DialogTitle>
-            <DialogDescription>
-              Urgency Sale is an exclusive premium feature that can help sell
-              your property faster.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-4 space-y-4">
-            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-              <h4 className="font-semibold flex items-center text-amber-800">
-                <Clock className="h-5 w-5 mr-2 text-amber-600" />
-                Why Urgency Sales Work
-              </h4>
-              <p className="mt-2 text-sm text-amber-700">
-                Properties listed as Urgency Sales sell up to 60% faster. The
-                25% discount attracts serious buyers looking for time-limited
-                deals. Your property gets featured in the Urgency Sales section
-                for maximum visibility.
-              </p>
-            </div>
-
-            <div className="border rounded-lg overflow-hidden">
-              <div className="bg-primary text-white p-4">
-                <h3 className="font-bold flex items-center text-lg">
-                  <Award className="h-5 w-5 mr-2" />
-                  Premium Plan Benefits
-                </h3>
-              </div>
-              <div className="p-4 space-y-3">
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <p className="text-sm">
-                    Urgency Sales with featured positioning
-                  </p>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <p className="text-sm">Top placement in search results</p>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <p className="text-sm">
-                    Advanced analytics and visitor tracking
-                  </p>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <p className="text-sm">Professional photography services</p>
-                </div>
-                <div className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                  <p className="text-sm">Dedicated property consultant</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-2 text-center">
-              <p className="text-sm text-gray-500 mb-2">
-                Upgrade now to access all premium features
-              </p>
-              <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
-                <div className="text-2xl font-bold flex items-center text-primary">
-                  <DollarSign className="h-5 w-5" /> 999/month
-                </div>
-                <div className="bg-green-100 text-green-800 text-xs py-1 px-2 rounded-full">
-                  7-day free trial available
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowPremiumModal(false)}
-            >
-              Maybe Later
-            </Button>
-            <Button
-              className="bg-primary hover:bg-primary/90"
-              onClick={() => {
-                setShowPremiumModal(false);
-                navigate("/subscription");
-              }}
-            >
-              Upgrade Now
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -1,8 +1,8 @@
-
-import React from 'react';
+import React from "react";
 import { Route, Switch } from "wouter";
-import { QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from '@/hooks/use-auth';
+import { QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/hooks/use-auth";
+import MobileNav from "@/components/layout/mobile-nav";
 
 // Global UI Components
 import ScrollToTop from "@/components/ui/scroll-to-top";
@@ -15,7 +15,6 @@ import NotFound from "@/pages/not-found";
 import TopPropertiesList from "@/pages/top-properties-list";
 import AuthPage from "@/pages/auth-page";
 import AddProperty from "@/pages/add-property";
-import EditProperty from "@/pages/edit-property";
 import PostPropertyFree from "@/pages/post-property-free";
 import Dashboard from "@/pages/dashboard";
 import PropertyDetail from "@/pages/property-detail";
@@ -34,7 +33,7 @@ import Disclaimer from "@/pages/policies/disclaimer";
 import Feedback from "@/pages/policies/feedback";
 import ReportProblem from "@/pages/policies/report-problem";
 
-import { queryClient } from '@/lib/query-client';
+import { queryClient } from "@/lib/query-client";
 
 function App() {
   return (
@@ -45,7 +44,6 @@ function App() {
           <Route path="/" component={HomePage} />
           <Route path="/auth" component={AuthPage} />
           <Route path="/properties" component={PropertiesPage} />
-          <Route path="/properties/:id" component={PropertyDetail} />
           <Route path="/property/:id" component={PropertyDetail} />
           <Route path="/property-detail/:id" component={PropertyDetail} />
           <Route path="/search-results" component={SearchResults} />
@@ -53,23 +51,22 @@ function App() {
           <Route path="/post-property-free" component={PostPropertyFree} />
           <Route path="/about" component={AboutPage} />
           <Route path="/contact" component={ContactPage} />
-          
+
           {/* Policy & Legal Pages */}
           <Route path="/terms-conditions" component={TermsConditions} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/disclaimer" component={Disclaimer} />
           <Route path="/feedback" component={Feedback} />
           <Route path="/report-problem" component={ReportProblem} />
-          
+
           {/* User Routes */}
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/add-property" component={AddProperty} />
-          <Route path="/edit-property/:id" component={EditProperty} />
           <Route path="/recommendations" component={RecommendationsPage} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin" component={AdminDashboard} />
-          
+
           {/* Top Properties Routes */}
           <Route path="/top-properties/:category">
             <TopPropertiesList />
@@ -81,6 +78,7 @@ function App() {
         <Toaster />
         <ScrollToTop />
         <Chatbot />
+        <MobileNav />
       </AuthProvider>
     </QueryClientProvider>
   );

@@ -15,6 +15,10 @@ import CTASection from "@/components/home/cta-section";
 import ServicesSection from "@/components/home/services-section";
 import NewlyListedProperties from "@/components/home/newly-listed-properties";
 import PropertyOwnerCTA from "@/components/home/property-owner-cta";
+import NewProjectsBanner from "@/components/home/new-projects-banner";
+import ImageGallery from "@/components/home/image-gallery";
+import FeatureProjectsGallery from "@/components/home/feature-projects-gallery";
+import LimitedTimeDeals from "@/components/home/limited-time-deals";
 
 export default function HomePage() {
   return (
@@ -24,6 +28,10 @@ export default function HomePage() {
         <HeroSection />
         <PropertyOwnerCTA />
         <TopProperties />
+        <LimitedTimeDeals />{" "}
+        {/* Added the new Limited-Time Deals section here */}
+        <ImageGallery />
+        <FeatureProjectsGallery />
         <FeaturedListings />
         <NewlyListedProperties />
         <ServicesSection />
@@ -32,6 +40,7 @@ export default function HomePage() {
         <ListPropertyCTA />
         <PropertyCategories />
         <TopCompanies />
+        <NewProjectsBanner />
         <Testimonials />
         <MobileApp />
         <CTASection />

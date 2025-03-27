@@ -22,6 +22,22 @@ export default defineConfig({
         ]
       : []),
   ],
+
+  build: {
+    chunkSizeWarningLimit: 1000,
+    outDir: path.resolve(__dirname, "dist/public"),
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          state: ['zustand', '@tanstack/react-query'],
+          // Removed the ui chunk since it's too small to be beneficial
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
@@ -29,8 +45,4 @@ export default defineConfig({
     },
   },
   root: path.resolve(__dirname, "client"),
-  build: {
-    outDir: path.resolve(__dirname, "dist/public"),
-    emptyOutDir: true,
-  },
 });

@@ -325,3 +325,7 @@ export const notificationTypes = ['system', 'promotion', 'update', 'property'] a
 
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+
+export const schema = {
+    // your schema definitions here
+};
